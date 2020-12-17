@@ -19,10 +19,10 @@ void generate_repetend(vector<int>& pre_rep, vector<int>& rep) {
     int d = 0;
     do {
         for (int p : pre_rep) {
-        d *= 10;
-        d += p;
-        rep.push_back(d / 3);
-        d = d - d / 3 * 3;
+            d *= 10;
+            d += p;
+            rep.push_back(d / 3);
+            d = d - d / 3 * 3;
         }
     } while (d);
 }
