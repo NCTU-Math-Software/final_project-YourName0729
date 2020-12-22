@@ -13,8 +13,7 @@ using namespace std;
 const int MOD = 1e9 + 7;
 const ll INF = 1e18;
 
-int threshold = 3;
-int MAXK = 6;
+int threshold = 8;
 vector<int> repetend[34];
 long long pow3[20];
 
@@ -112,34 +111,31 @@ vector<int> read_repetend(fstream& fin) {
     return re;
 }
 
-void solver(long long n) {
-    vector<int> ans;
-    int d = 0;
-    for (int i = n + 15; i >= n - 1; i--) {
-        for (int j = 0; j <= MAXK; j++) {
-            d += digit_one(j, i);
-        }
-        ans.push_back(d % 10);
-        d /= 10;
-    }
-    
-    for (int i = 0; i < 10; i++) {
-        cout << ans[ans.size() - 1 - i] << ' ';
-    }
-    cout << '\n';
-}
-
 int main() {
     //ios_base::sync_with_stdio(0); cin.tie(0);
 
     init_repetend();
     init_pow3();
 
+    fstream fin;
+    fin.open("repetend.txt");
 
+    int k = 16;
 
-    solver(100);
+    for (int i = 1; i <= k - 1; i++)    read_repetend(fin);
 
-    
+    vector<int> rep = read_repetend(fin);
+
+    for (int i = 0; i < 100; i++) {
+        std::random_device rd;
+        std::default_random_engine gen = std::default_random_engine(rd());
+        std::uniform_int_distribution<int> dis(0, pow3[k - 2] - 1);
+        if (rep[i] != repetend_one(k, i)) {
+            cout << "GG\n";
+            return 0;
+        }
+    }
+    cout << "Good\n";
 
 
     return 0;

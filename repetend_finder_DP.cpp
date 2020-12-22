@@ -36,21 +36,22 @@ int dig(int k, int d, vector<int>& repeetend) {
 }
 
 void output(int n) {
-    stack<int> ans;
+    vector<int> ans;
     int d = 0;
-    for (int i = n + 15; i >= n - 1; i--) {
+    // n + 15, n - 1;
+    for (int i = n + 20; i >= n - 10; i--) {
         //cout << i << '\n';
         for (int j = 1; j <= 16; j++) {
             d += dig(j, i, repeetend[j]);
         }
-        ans.push(d % 10);
+        ans.push_back(d % 10);
         d /= 10;
     }
 
-    For (i, 10) {
-        cout << ans.top();
-        ans.pop();
+    for (int i = ans.size() - 1; i >= 0; i--) {
+        cout << ans[i] << ' ';
     }
+    cout << '\n';
 }
 
 int main() {
