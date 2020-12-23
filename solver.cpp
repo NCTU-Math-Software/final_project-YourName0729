@@ -115,7 +115,7 @@ void solver(uint64 n) {
     for (uint32 i = extend - 1; i > 0; i--) {
         ans[i - 1] += ans[i] / 10;
         ans[i] %= 10;
-    }
+    } 
     ans[0] %= 10;
     for (uint32 i = 0; i < 10; i++) {
         cout << ans[i];
