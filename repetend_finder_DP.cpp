@@ -39,7 +39,7 @@ void output(int n) {
     vector<int> ans;
     int d = 0;
     // n + 15, n - 1;
-    for (int i = n + 20; i >= n - 10; i--) {
+    for (int i = n + 13; i >= n - 1; i--) {
         //cout << i << '\n';
         for (int j = 1; j <= 16; j++) {
             d += dig(j, i, repeetend[j]);

@@ -11,7 +11,7 @@ vector<uint32> repetend[threshold + 1];
 uint64 pow3[MAXK + 1];
 
 uint32 reminder(uint32 start, uint32 q, vector<uint32>& rep, uint32 n) {
-    if (q == 0 || rep.size() == 0)  throw invalid_argument("reminder error");
+    //if (q == 0 || rep.size() == 0)  throw invalid_argument("reminder error");
 
     uint32 d = start % q;
     for (uint32 i = 0; i < n; i++) {
@@ -23,7 +23,7 @@ uint32 reminder(uint32 start, uint32 q, vector<uint32>& rep, uint32 n) {
 }
 
 void repetender(uint32 start, uint32 q, vector<uint32>& rep, uint32 n, vector<uint32>& fetch) {
-    if (q == 0 || rep.size() == 0)  throw invalid_argument("repetender error");
+    //if (q == 0 || rep.size() == 0)  throw invalid_argument("repetender error");
 
     uint32 d = start % q;
     for (uint32 i = 0; i < n; i++) {
@@ -32,20 +32,6 @@ void repetender(uint32 start, uint32 q, vector<uint32>& rep, uint32 n, vector<ui
         fetch.push_back(d / q);
         d = d - d / q * q;
     }
-}
-
-uint32 producter(uint32 start, uint32 q, vector<uint32>& rep, uint32 n) {
-    if (q == 0 || rep.size() == 0)  throw invalid_argument("producter error");
-
-    uint32 d = start % q;
-    for (uint32 i = 0; i < n; i++) {
-        d *= 10;
-        d += rep[i % rep.size()];
-        d = d - d / q * q;
-    }
-    d *= 10;
-    d += rep[n % rep.size()];
-    return d / q;
 }
 
 void init_repetend() {
@@ -63,38 +49,6 @@ void init_pow3() {
     }
 }
 
-uint32 repetend_one(uint32 k, uint64 n) {
-    cout << "repetend one " << k << ' ' << n << '\n';
-    if (k == 0) return 0;
-    if (k == 1) return 3;
-
-    n %= pow3[k - 2];
-    if (k <= threshold) return repetend[k][n];
-
-    uint32 l = k - threshold;
-    k = threshold;
-    vector<uint32> zeros = {0};
-
-    uint32 dn = n / pow3[k - 2];
-
-    uint32 a = reminder(0, pow3[l], repetend[k], pow3[k - 2]);
-    uint32 b = reminder(1, pow3[l], zeros, pow3[k - 2]);
-    uint32 c = 0;
-    uint32 p = 1;
-    for (uint32 i = 0; i < dn; i++) {
-        p = p * b % pow3[l];
-        c = (c + p) % pow3[l];
-    }
-    
-    uint32 start = a * c % pow3[l];
-    return producter(start, pow3[l], repetend[k], n - dn * pow3[k - 2]);
-}
-
-uint32 digit_one(uint32 k, uint64 n) {
-    if (n < pow3[k])   return 0;
-    return repetend_one(k, n - pow3[k]);
-}
-
 vector<uint32> read_repetend(fstream& fin) {
     vector<uint32> re;
     uint32 n, tmp;
@@ -107,7 +61,6 @@ vector<uint32> read_repetend(fstream& fin) {
 }
 
 vector<uint32> repetend_seg(int k, uint64 n, uint32 extend) {
-    //cout << "seg " << k << ' ' << n << ' ' << extend << '\n';
     vector<uint32> re(extend);
     if (n < pow3[k]) return re;
     if (k == 1) {
@@ -116,7 +69,6 @@ vector<uint32> repetend_seg(int k, uint64 n, uint32 extend) {
     }
     n %= pow3[k - 2];
     if (k <= threshold) {
-        //cout << "?\n";
         for (int i = 0; i < extend; i++) {
             re[i] = repetend[k][(n + i) % repetend[k].size()];
         }
@@ -157,39 +109,19 @@ void solver(uint64 n) {
     for (uint32 i = 1; i <= MAXK; i++) {
         vector<uint32> d = repetend_seg(i, n - 1, extend);
         for (uint32 j = 0; j < extend; j++) {
-            //cout << d[j] << ' ';
             ans[j] += d[j];
         }
-        //cout << '\n';
     }
     for (uint32 i = extend - 1; i > 0; i--) {
         ans[i - 1] += ans[i] / 10;
         ans[i] %= 10;
     }
     ans[0] %= 10;
-    for (uint32 i = 0; i < extend; i++) {
-        cout << ans[i] << ' ';
+    for (uint32 i = 0; i < 10; i++) {
+        cout << ans[i];
     }
     cout << '\n';
 }
-
-/*void solver(uint64 n) {
-    cout << n << '\n';
-    vector<uint32> ans;
-    uint32 d = 0;
-    for (uint64 i = n + 15; i >= n - 1; i--) {
-        for (uint32 j = 0; j <= MAXK; j++) {
-            d += digit_one(j, i);
-        }
-        ans.push_back(d % 10);
-        d /= 10;
-    }
-    
-    for (uint32 i = 0; i < 10; i++) {
-        cout << ans[ans.size() - 1 - i] << ' ';
-    }
-    cout << '\n';
-}*/
 
 int main() {
 
