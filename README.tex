@@ -1,13 +1,14 @@
 \documentclass[paper=a4]{scrartcl}
 
 \usepackage[utf8]{inputenc}
+\usepackage{algorithmic}
 \usepackage{tcolorbox}
 \usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{textcomp}
 
-\title{Final Project YourName0729}
+\title{$3^{-n}$ Decimal Problem}
 \author{Ting-Yo Kuo}
 \date{}
 
@@ -29,12 +30,85 @@ A=\sum_{n=1}^\infty A_n
 \]
 \end{tcolorbox}
 \begin{tcolorbox}[arc=0pt,colback=white,title={Definition}]
-Given a real number $a=0.a_0a_1a_2\ldots\in[0,1)$ which does not end with repeating 9 and $n\in\mathbb{N}\cup\{0\}$, \textbf{the $n$-th term of $a$} is $a_n$.
+Given a real number $a=0.a_1a_2a_3\ldots\in[0,1)$ which does not end with repeating 9 and $n\in\mathbb{N}$, \textbf{the $n$-th term of $a$} is $a_n$.  
 \end{tcolorbox}
-\begin{tcolorbox}[arc=0pt,colback=white,title={Problem}]
-Given $n\in\mathbb{N}\cup\{0\}$, find the $(n-1)$-th to $(n+8)$-th terms of $A$?
-\end{tcolorbox}
+Now given $n\in\mathbb{N}$,  find the $n$-th to $(n+9)$-th terms of $A$? Consider $n=10^2,10^8,10^{16}$.
 
 \subsection{Outline of Solution}
+Since $n$ is at most $10^{16}$, it's sufficient to approximate $A$ to be $\sum_{n=1}^{33}A_n$. Then we find $k$-th term of $A$ by finding around $k$-th terms of $A_n$ and sum them all. For $k\leq 16$, we find it in directly way, by finding its repetend. For $k>16$, let $a = 16, b = k-16$, then simulating $3^b$ divides the repetend of $1/3^a$. With some regularity, we can jump with the length $3^{a-2}$ when simulating. In conclusion, we get a solution with time complexity $O(\sqrt{n})$, which is good enough to halt in 1 minutes.
 
+\section{Properties of the repetend of $1/3^k$}
+\begin{tcolorbox}[arc=0pt,colback=white,title={Fact}]
+\begin{itemize}
+\item[1.] If $a\in\mathbb{Q}$, then $a$ has a repeating decimal representation.
+\item[2.] If the repetend of $1/3^n=0.a_1\ldots a_{k}\overline{a_{k+1}\ldots a_{k+l}}$, then $k=0$.
+\item[3.] \textbf{Long division} algorithm
+\end{itemize}
+\end{tcolorbox}
+\begin{tcolorbox}[arc=0pt,colback=white,title={Definition}]
+When $a\in[0,1)$ is in the form $0.a_1a_2\ldots a_{k}\overline{a_{k+1}a_{k+1}\ldots a_{k+l}}$ with least $k$ and $l$, and $a_{k+1},\ldots,a_{k+l}$ not all zero, $a_{k+1}\ldots a_{k+l}$ is called the \textbf{repetend} of $a$. The length of the repetend of $a$ is $l$.
+\end{tcolorbox}
+\begin{tcolorbox}[arc=0pt,colback=white,title={Property}]
+The length of the repetend of $1/3$ is 1. For $n\geq 2$, the length of the repetend of $1/3^n$ is $3^{n-2}$.
+\tcblower
+\textit{Proof. } Induction on $n$. $1/3=0.\overline 3$ and $1/9=0.\overline 1$ are trivial. For $1/3^n$, we generate the repetend of $1/3^n$ by  3 dividing the repetend of $1/3^{n-1}$.  Let the repetend of $1/3^{n-1}=0.\overline{a_1\ldots a_{3l}}$ and $1/3^{n-2}=0.\overline{b_1\ldots b_l}$. If $a_1\ldots a_{3l}=0\pmod{3}$, then $b_1\ldots b_lb_1\ldots b_lb_1\ldots b_l=0\pmod{9}$, thus $b_1\ldots b_l=0\pmod 3$. Then the length of the repetend of $1/3^{n-1}$ can be $l<3l$, a contradiction. If $a_0\ldots a_{3l}=1\pmod 3$, then $a_1\ldots a_{3l}a_1\ldots a_{3l}=10\ldots 01=2\pmod 3$. And $a_1\ldots a_{3l}a_1\ldots a_{3l}a_1\ldots a_{3l}=10\ldots 010\ldots 01=3=0\pmod 3$. Hence the length of the repetend of $1/3^n$ is a factor of $9l$. On the other hand, it is similar for the case $a_1\ldots a_{3l}=2\pmod 3$. Also, it is larger than $3l$, therefore, it is exactly $9l$. By induction, $9l=3^{n-2}$.
+\end{tcolorbox}
+
+\begin{tcolorbox}[arc=0pt,colback=white,title={Property}]
+Let $n,m\in\mathbb{N}$, $n\geq \max\{2,m\}$, then 
+\[
+10^{3^{n-2}}=1\pmod{3^m}
+\]
+\tcblower
+\textit{Proof.} Induction on $m$. Clear for $m=3,9$. Given $m$, let $n=m-2$. By induction, $10^{3^{n-3}}=1\pmod{3^{m-1}}$, then $10^{3^{n-2}}=10^{3^{n-3}}10^{3^{n-3}}10^{3^{n-3}}$. Thus $10^{3^{n-2}}=1\pmod{3^m}$. And it's clear for $n>\max\{2,m\}$.
+\end{tcolorbox}
+
+\section{Algorithm to solve the problem}
+\begin{tcolorbox}[arc=0pt,colback=white,title={Algorithm}]
+Find the repetend of $3^{-n}$, brutal method.
+\tcblower
+\begin{algorithmic}
+\STATE Let $V:=\emptyset,d:=1,A=()$
+\WHILE {$d\not\in V$} 
+	\STATE $V:=V\cup\{d\}$
+    \STATE $d:=10d$
+    \STATE Let $a\in\mathbb{N}\cup\{0\}$ be maximum such that $a3^n\leq d$
+    \STATE $A:=(A,a)$
+    \STATE $d:=d-a3^n$
+\ENDWHILE 
+\RETURN $A$
+\end{algorithmic}
+\end{tcolorbox}
+
+\begin{tcolorbox}[arc=0pt,colback=white,title={Algorithm}]
+Find the repetend of $3^{-n}$, with the fact that the length of the repetend of $3^{-n}$ is $3^{n-2}$.
+\tcblower
+\begin{algorithmic}
+\STATE Let $d:=1,A=()$
+\FOR {$i:=1$ \TO $3^{n-2}$} 
+    \STATE $d:=10d$
+    \STATE Let $a\in\mathbb{N}\cup\{0\}$ be maximum such that $a3^n\leq d$
+    \STATE $A:=(A,a)$
+    \STATE $d:=d-a3^n$
+\ENDFOR
+\RETURN $A$
+\end{algorithmic}
+\end{tcolorbox}
+The above 2 algorithms are allowable for $n\leq 17$, at the limit of time and space.
+
+\section{Derivation for $n>17$}
+
+\ \ Consider $n>17$, we can't store the whole repetend, but we still can find specified terms. If we want to find $k$-th term. It's equivalent to find the remainder of $10^{k-1}\ \%\ 3^n$. then do one step of long division.
+
+Let $m=17,l=n-17$. Factor $10^{k-1}$ into \[10^{m-2}\ldots 10^{m-2}10^{k-1-N(m-2)},\] where $10^{m-2}$ repeat $N$ times and $N$ is the maximum that $N(m-2)\leq k-1$. Let $a_1\ldots a_{3^{m-2}}$ be the repetend of $3^{m-2}$. Notice that $1/3^n=1/3^m1/3^l=0.\overline{a_1\ldots a_{3^{m-2}}}/3^l$. Thus
+\begin{equation}
+\begin{split}
+  & 10^{k-1} \pmod{3^n}\\
+= & 10^{m-2}\ldots 10{m-2}10^{k-1-N(m-2)}\pmod{3^n}
+\end{split}
+\end{equation}
+
+\begin{tcolorbox}[arc=0pt,colback=white,title={Definition}]
+
+\end{tcolorbox}
 \end{document}
