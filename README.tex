@@ -35,7 +35,7 @@ Given a real number $a=0.a_1a_2a_3\ldots\in[0,1)$ which does not end with repeat
 Now given $n\in\mathbb{N}$,  find the $n$-th to $(n+9)$-th terms of $A$? Consider $n=10^2,10^8,10^{16}$.
 
 \subsection{Outline of Solution}
-Since $n$ is at most $10^{16}$, it's sufficient to approximate $A$ to be $\sum_{n=1}^{33}A_n$. Then we find $k$-th term of $A$ by finding around $k$-th terms of $A_n$ and sum them all. For $k\leq 16$, we find it in directly way, by finding its repetend. For $k>16$, let $a = 16, b = k-16$, then simulating $3^b$ divides the repetend of $1/3^a$. With some regularity, we can jump with the length $3^{a-2}$ when simulating. In conclusion, we get a solution with time complexity $O(\sqrt{n})$, which is good enough to halt in 1 minutes.
+Since $n$ is at most $10^{16}$, it's sufficient to approximate $A$ to be $\sum_{n=1}^{33}A_n$. Then we find $k$-th term of $A$ by finding around $k$-th terms of $A_n$ and sum them all. For $k\leq 16$, we find it in directly way, by finding its repetend. For $k>16$, let $a = 16, b = k-16$, then simulating $3^b$ divides the repetend of $1/3^a$. With some regularity, we can jump with the length $3^{a-2}$ when simulating. In conclusion, we get a solution with time complexity $O(\sqrt{n}\log n)$, which is good enough to halt in 1 minutes.
 
 \section{Properties of the repetend of $1/3^k$}
 \begin{tcolorbox}[arc=0pt,colback=white,title={Fact}]
@@ -55,15 +55,16 @@ The length of the repetend of $1/3$ is 1. For $n\geq 2$, the length of the repet
 \end{tcolorbox}
 
 \begin{tcolorbox}[arc=0pt,colback=white,title={Property}]
-Let $n,m\in\mathbb{N}$, $n\geq \max\{2,m\}$, then 
+Let $n,m\in\mathbb{N}\cup\{0\}$, then 
 \[
-10^{3^{n-2}}=1\pmod{3^m}
+10^{n3^{m-2}}=1\pmod{3^m}
 \]
 \tcblower
-\textit{Proof.} Induction on $m$. Clear for $m=3,9$. Given $m$, let $n=m-2$. By induction, $10^{3^{n-3}}=1\pmod{3^{m-1}}$, then $10^{3^{n-2}}=10^{3^{n-3}}10^{3^{n-3}}10^{3^{n-3}}$. Thus $10^{3^{n-2}}=1\pmod{3^m}$. And it's clear for $n>\max\{2,m\}$.
+\textit{Proof.} Consider $n=1$. Induction on $m$. Clear for $m=3,9$. Given $m$, let $n=m-2$. By induction, $10^{3^{n-3}}=1\pmod{3^{m-1}}$, then $10^{3^{n-2}}=10^{3^{n-3}}10^{3^{n-3}}10^{3^{n-3}}$. Thus $10^{3^{n-2}}=1\pmod{3^m}$. And it's clear for $n=0$ and $n>1$.
 \end{tcolorbox}
 
 \section{Algorithm to solve the problem}
+We consider solving $A_n$ only, then we can get solution by summing $A_1$ to $A_{33}$.
 \begin{tcolorbox}[arc=0pt,colback=white,title={Algorithm}]
 Find the repetend of $3^{-n}$, brutal method.
 \tcblower
@@ -80,35 +81,57 @@ Find the repetend of $3^{-n}$, brutal method.
 \end{algorithmic}
 \end{tcolorbox}
 
-\begin{tcolorbox}[arc=0pt,colback=white,title={Algorithm}]
-Find the repetend of $3^{-n}$, with the fact that the length of the repetend of $3^{-n}$ is $3^{n-2}$.
-\tcblower
-\begin{algorithmic}
-\STATE Let $d:=1,A=()$
-\FOR {$i:=1$ \TO $3^{n-2}$} 
-    \STATE $d:=10d$
-    \STATE Let $a\in\mathbb{N}\cup\{0\}$ be maximum such that $a3^n\leq d$
-    \STATE $A:=(A,a)$
-    \STATE $d:=d-a3^n$
-\ENDFOR
-\RETURN $A$
-\end{algorithmic}
-\end{tcolorbox}
-The above 2 algorithms are allowable for $n\leq 17$, at the limit of time and space.
+The above algorithm is allowed for $n\leq 17$, at the limit of time and space.
 
 \section{Derivation for $n>17$}
 
-\ \ Consider $n>17$, we can't store the whole repetend, but we still can find specified terms. If we want to find $k$-th term. It's equivalent to find the remainder of $10^{k-1}\ \%\ 3^n$. then do one step of long division.
+$\ \ $For $n>17$, let $m=17,l=n-17$. By long division algorithm, to get the $k$-th term of $1/3^{n}$, we can simulate $\frac{3^{-m}}{3^l}$, where we replace 
+$3^{-m}$ with $0.\overline{a_1\ldots a_{3^{m-2}}}$, the repetend of $3^{-m}$. To get the $k$-th term of $3^{-n}$, it's equivalent to first compute the remainder, $a_1\ldots a_{k-1}\mod 3^l$, where we define $a_i=a_j\Leftrightarrow i=j\pmod{3^{m-2}}$. Next, we split $a_1\ldots a_{k-1}$ into $N$ or $N+1$ pieces, where $N$ is maximum satisfying $N3^{m-2}\leq k-1$, say $a_1\ldots a_{N3^{m-2}}a_{N3^{m-2}+1}\ldots a_{k-1}$. Although $N\approx 10^{16}$, we have fast algorithm to compute $a_1\ldots a_{N3^{m-2}}\mod 3^l$, by
 
-Let $m=17,l=n-17$. Factor $10^{k-1}$ into \[10^{m-2}\ldots 10^{m-2}10^{k-1-N(m-2)},\] where $10^{m-2}$ repeat $N$ times and $N$ is the maximum that $N(m-2)\leq k-1$. Let $a_1\ldots a_{3^{m-2}}$ be the repetend of $3^{m-2}$. Notice that $1/3^n=1/3^m1/3^l=0.\overline{a_1\ldots a_{3^{m-2}}}/3^l$. Thus
 \begin{equation}
 \begin{split}
-  & 10^{k-1} \pmod{3^n}\\
-= & 10^{m-2}\ldots 10{m-2}10^{k-1-N(m-2)}\pmod{3^n}
+  & a_1\ldots a_{N3^{m-2}} \pmod{3^l}\\
+= & (a_1\ldots a_{3^{m-2}})(10^{(N-1)3^{m-2}}+10^{(N-2)3^{M-2}}+\ldots +10^0)\pmod{3^l}\\
+= & (a_1\ldots a_{3^{m-2}}\mod 3^l)\sum_{i=0}^{N-1}(10^{i3^{m-2}}\mod 3^l)\\
+= & (a_1\ldots a_{3^{m-2}}\mod 3^l)N
 \end{split}
 \end{equation}
 
-\begin{tcolorbox}[arc=0pt,colback=white,title={Definition}]
+Hence we have the following method.
+\begin{tcolorbox}[arc=0pt,colback=white,title={Algorithm}]
+Given $k,n\in\mathbb{N}$, $n>17$, find $k$-th term of $3^{-n}$
+\tcblower
+\begin{algorithmic}
+\STATE $m:=17$, $l:=n-17$, $a_1\ldots a_{3^{m-2}}:=$ the repetend of $3^{-m}$
+\STATE $N:=$ the maximum satisfying $N3^{m-2}\leq k-1$
+\STATE $a:=(a_1\ldots a_{3^{m-2}}\mod 3^l)N\mod 3^l$
+\RETURN $aa_1a_2\ldots a_{k-1-N3^{m-2}}\mod 3^l$
+\end{algorithmic}
+\end{tcolorbox}
+Thus we have a method to get $k$-th term of $A_n$. Each step of the above algorithm is $O(\sqrt k)$. Thus totally $O(\sqrt k\log k)$ to find all $A_n$, $1\leq n\leq 33$.
 
+\section{Carry of the summation of $A_n$}
+The problem ask $(n-1)$-th term to $(n+9)$-th terms, but we can't only fetch those term, we also need to take $(n+10)$-th, $(n+11)$-th or more into consideration, since it may carry to $(n+9)$-th term of $A$.
+\begin{tcolorbox}[arc=0pt,colback=white,title={Property}]
+For $n=10^{16}$, we need to consider at most $(n+11)$-th term.
+\tcblower \textit{Proof.} Let the carry from $3^{-34}$-th term be $c$. Then the carry from $(3^{-34}-1)$-th term is at most $\lfloor (c+9\times 33)/10\rfloor$, the carry from $(3^{-34}-2)$-th term is at most $\lfloor(\lfloor(c+9\times 33)/10\rfloor+9\times 33)/10\rfloor$. Define a sequence $a_1=c$, $a_n=\lfloor(a_{n-1}+297)/10\rfloor$. Since $a_n$ is bounded above by sequence $b_1=c$, $b_n=(b_{n-1}+297)/10$. And solve it that $b_n=b_1\times 10^{-(n-1)}+29.7\sum_{i=0}^{n-2}10^{i}=c10^{1-n}+29.7/90(10^n-10)$. Now take $n=3^{34}-3^{33}+9$, which is large enough that $a_n$ is at most 2 digits. Thus if we consider $(n+11)$-th term, it will not affect $(n+9)$-th term.
+\end{tcolorbox}
+
+\section{Conclude}
+In conclusion, we have the following method to solve the problem.
+\begin{tcolorbox}[arc=0pt,colback=white,title={Algorithm}]
+Given $k\leq 10^{16}$, find the $(k-1)$-th term to $(k+9)$-th term of $A$.
+\tcblower
+\begin{algorithmic}
+\FOR {$n=1$ \TO $33$}
+	\IF {$k\leq 3^{17}$}
+		\STATE apply algorithm of section 3, find $(k-1)$-th to $(k+11)$-th term of $A_n$
+	\ELSE 
+		\STATE apply algorithm of section 4, find $(k-1)$-th to $(k+11)$0th term of $A_n$.
+	\ENDIF
+\ENDFOR
+\STATE add those terms
+\RETURN the $(k-1)$-th to $(k+9)$-th term
+\end{algorithmic}
 \end{tcolorbox}
 \end{document}
